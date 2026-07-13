@@ -7,12 +7,18 @@ git add .
 
 git diff --cached --quiet
 if %errorlevel%==0 (
+    echo Tidak ada perubahan.
+    pause
     exit
 )
 
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format \"yyyy-MM-dd HH:mm:ss\""') do set DATETIME=%%i
+git commit -m "Auto Backup"
 
-git commit -m "Auto Backup %DATETIME%"
 git push
 
-exit
+echo.
+echo ============================
+echo Push berhasil!
+echo ============================
+
+pause
