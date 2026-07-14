@@ -1,61 +1,44 @@
 @echo off
-title Git Auto Push
+title Git Push
 
 cd /d "D:\YueMeM\Goes to TA\TA GIT\TA-HEYKAL-093-KING-ALUMINIUM-MALANG"
 
-echo ====================================
-echo Menambahkan perubahan...
-echo ====================================
 git add .
 
 git diff --cached --quiet
 if %errorlevel%==0 (
-    echo.
     echo Tidak ada perubahan.
     pause
     exit
 )
 
-echo.
-echo ====================================
-echo Commit...
-echo ====================================
-git commit -m "Auto Backup"
+set /p MESSAGE=Masukkan pesan commit: 
 
-echo.
-echo ====================================
-echo Mengambil update dari GitHub...
-echo ====================================
+if "%MESSAGE%"=="" (
+    set MESSAGE=Auto Backup
+)
+
+git commit -m "%MESSAGE%"
+
 git pull origin main --no-rebase
 
 if %errorlevel% neq 0 (
-    echo.
-    echo ====================================
-    echo GAGAL SAAT PULL!
-    echo Selesaikan konflik terlebih dahulu.
-    echo ====================================
+    echo Gagal saat pull.
     pause
     exit
 )
 
-echo.
-echo ====================================
-echo Push ke GitHub...
-echo ====================================
 git push origin main
 
 if %errorlevel% neq 0 (
-    echo.
-    echo ====================================
-    echo PUSH GAGAL!
-    echo ====================================
+    echo Gagal saat push.
     pause
     exit
 )
 
 echo.
-echo ====================================
-echo PUSH BERHASIL!
-echo ====================================
+echo =====================================
+echo Push berhasil!
+echo =====================================
 
 pause
