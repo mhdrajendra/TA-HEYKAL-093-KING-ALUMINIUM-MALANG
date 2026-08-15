@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
 import {
   getMaterials,
+  saveMaterials,
   type Material,
   type MaterialStatus,
 } from "@/lib/materials";
@@ -50,7 +52,11 @@ function MaterialIcon() {
   );
 }
 
-function StatusIcon({ status }: { status: MaterialStatus }) {
+function StatusIcon({
+  status,
+}: {
+  status: MaterialStatus;
+}) {
   if (status === "Aman") {
     return (
       <Icon size={17}>
@@ -77,7 +83,11 @@ function StatusIcon({ status }: { status: MaterialStatus }) {
   );
 }
 
-function TransactionIcon({ type }: { type: "in" | "out" }) {
+function TransactionIcon({
+  type,
+}: {
+  type: "in" | "out";
+}) {
   return (
     <Icon size={17}>
       {type === "in" ? (
@@ -96,22 +106,60 @@ function TransactionIcon({ type }: { type: "in" | "out" }) {
 }
 
 export default function MaterialPage() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("Semua Kategori");
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] =
+    useState("Semua Kategori");
 
   useEffect(() => {
     setMaterials(getMaterials());
   }, []);
 
-  const filteredMaterials = materials.filter((material) =>
-    material.name.toLowerCase().includes(search.toLowerCase())
+  const filteredMaterials = materials.filter(
+    (material) => {
+      const matchesSearch = material.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchesCategory =
+        category === "Semua Kategori" ||
+        material.type === category;
+
+      return matchesSearch && matchesCategory;
+    }
   );
 
   const totalMaterial = materials.length;
-  const lowStock = materials.filter((m) => m.status === "Rendah").length;
-  const emptyStock = materials.filter((m) => m.status === "Kosong").length;
-  const totalStock = materials.reduce((sum, m) => sum + m.stock, 0);
+
+  const lowStock = materials.filter(
+    (material) => material.status === "Rendah"
+  ).length;
+
+  const emptyStock = materials.filter(
+    (material) => material.status === "Kosong"
+  ).length;
+
+  const totalStock = materials.reduce(
+    (sum, material) => sum + material.stock,
+    0
+  );
+
+  const handleDelete = () => {
+  if (!deleteTarget) {
+    return;
+  }
+
+  const updatedMaterials = materials.filter(
+    (item) => item.id !== deleteTarget.id
+  );
+
+  saveMaterials(updatedMaterials);
+  setMaterials(updatedMaterials);
+  setDeleteTarget(null);
+};
+
+  const [deleteTarget, setDeleteTarget] =
+  useState<Material | null>(null);
 
   return (
     <div className="page-layout">
@@ -131,28 +179,44 @@ export default function MaterialPage() {
         </div>
 
         <nav className="sidebar-menu">
-          <Link href="/dashboard" className="sidebar-item">
+          <Link
+            href="/dashboard"
+            className="sidebar-item"
+          >
             <span className="sidebar-icon">
               <Icon>
-                <rect x="4" y="7" width="16" height="13" rx="2" />
+                <rect
+                  x="4"
+                  y="7"
+                  width="16"
+                  height="13"
+                  rx="2"
+                />
                 <path d="M7 7V5a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v2" />
               </Icon>
             </span>
-            Dashboard
+
+            <span>Dashboard</span>
           </Link>
 
-          <Link href="/material" className="sidebar-item active">
+          <Link
+            href="/material"
+            className="sidebar-item active"
+          >
             <span className="sidebar-icon">
               <Icon>
                 <path d="M4 12a8 8 0 1 0 16 0" />
-                <path d="M4 12a8 8 0 0 1 16 0" />
                 <path d="M8 14l3-3 2 2 4-5" />
               </Icon>
             </span>
-            Data Material
+
+            <span>Data Material</span>
           </Link>
 
-          <Link href="/pengecekan-stok" className="sidebar-item">
+          <Link
+            href="/pengecekan-stok"
+            className="sidebar-item"
+          >
             <span className="sidebar-icon">
               <Icon>
                 <path d="M6 3h8l4 4v14H6z" />
@@ -160,10 +224,14 @@ export default function MaterialPage() {
                 <circle cx="10" cy="14" r="3" />
               </Icon>
             </span>
-            Pengecekan Stok
+
+            <span>Pengecekan Stok</span>
           </Link>
 
-          <Link href="/pengadaan" className="sidebar-item">
+          <Link
+            href="/pengadaan"
+            className="sidebar-item"
+          >
             <span className="sidebar-icon">
               <Icon>
                 <path d="M3 7h11v10H3z" />
@@ -172,10 +240,14 @@ export default function MaterialPage() {
                 <circle cx="18" cy="19" r="2" />
               </Icon>
             </span>
-            Pengadaan Material
+
+            <span>Pengadaan Material</span>
           </Link>
 
-          <Link href="/persetujuan-pengadaan" className="sidebar-item">
+          <Link
+            href="/persetujuan-pengadaan"
+            className="sidebar-item"
+          >
             <span className="sidebar-icon">
               <Icon>
                 <path d="M12 3 4 7l8 4 8-4-8-4Z" />
@@ -183,25 +255,40 @@ export default function MaterialPage() {
                 <path d="m4 17 8 4 8-4" />
               </Icon>
             </span>
-            Persetujuan Pengadaan
+
+            <span>Persetujuan Pengadaan</span>
           </Link>
 
-          <Link href="/riwayat-transaksi" className="sidebar-item">
+          <Link
+            href="/riwayat-transaksi"
+            className="sidebar-item"
+          >
             <span className="sidebar-icon">
               <Icon>
-                <rect x="5" y="4" width="14" height="17" rx="2" />
+                <rect
+                  x="5"
+                  y="4"
+                  width="14"
+                  height="17"
+                  rx="2"
+                />
                 <path d="M9 2v4M15 2v4M8 10h8" />
               </Icon>
             </span>
-            Riwayat Transaksi
+
+            <span>Riwayat Transaksi</span>
           </Link>
         </nav>
 
-        <Link href="/" className="logout-button">
+        <Link
+          href="/"
+          className="logout-button"
+        >
           <Icon size={27}>
             <path d="M9 5a7 7 0 1 0 6 0" />
             <path d="M12 2v7" />
           </Icon>
+
           <span>Logout</span>
         </Link>
       </aside>
@@ -211,13 +298,24 @@ export default function MaterialPage() {
         <header className="topbar">
           <div className="search-box">
             <SearchIcon />
-            <input placeholder="Search..." />
+
+            <input
+              placeholder="Search..."
+              value=""
+              readOnly
+            />
           </div>
 
           <div className="topbar-right">
             <button className="topbar-icon">
               <Icon size={25}>
-                <rect x="3" y="5" width="18" height="14" rx="3" />
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="14"
+                  rx="3"
+                />
                 <path d="m4 7 8 6 8-6" />
               </Icon>
             </button>
@@ -232,7 +330,11 @@ export default function MaterialPage() {
             <div className="profile">
               <div className="avatar">
                 <Icon size={29}>
-                  <circle cx="12" cy="8" r="3.5" />
+                  <circle
+                    cx="12"
+                    cy="8"
+                    r="3.5"
+                  />
                   <path d="M5 20c.7-3.5 3.1-5 7-5s6.3 1.5 7 5" />
                 </Icon>
               </div>
@@ -251,21 +353,26 @@ export default function MaterialPage() {
           <div className="page-heading">
             <div>
               <h1>Data Material</h1>
+
               <p>
-                Kelola data material dan lakukan pencatatan material masuk
-                atau keluar.
+                Kelola data material dan lakukan
+                pencatatan material masuk atau keluar.
               </p>
             </div>
 
-            <Link href="/material/tambah" className="primary-action">
+            <Link
+              href="/material/tambah"
+              className="primary-action"
+            >
               <Icon size={22}>
                 <path d="M12 5v14M5 12h14" />
               </Icon>
+
               Tambah Material
             </Link>
           </div>
 
-          {/* STATS */}
+          {/* STAT */}
           <div className="material-stat-grid">
             <div className="material-stat blue">
               <div>
@@ -303,7 +410,9 @@ export default function MaterialPage() {
             <div className="material-stat green">
               <div>
                 <span>Total Stok</span>
-                <strong>{totalStock.toLocaleString("id-ID")}</strong>
+                <strong>
+                  {totalStock.toLocaleString("id-ID")}
+                </strong>
               </div>
 
               <div className="material-stat-icon">
@@ -312,7 +421,7 @@ export default function MaterialPage() {
             </div>
           </div>
 
-          {/* TABLE CARD */}
+          {/* TABLE */}
           <div className="material-table-card">
             <div className="table-toolbar">
               <div className="table-search">
@@ -322,23 +431,41 @@ export default function MaterialPage() {
                   type="text"
                   placeholder="Cari material..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                 />
               </div>
 
               <div className="category-select">
                 <Icon size={20}>
-                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <rect
+                    x="4"
+                    y="4"
+                    width="16"
+                    height="16"
+                    rx="2"
+                  />
                   <path d="M8 9h8M8 12h5M8 15h7" />
                 </Icon>
 
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={(e) =>
+                    setCategory(e.target.value)
+                  }
                 >
-                  <option>Semua Kategori</option>
-                  <option>Aluminium</option>
-                  <option>Perlengkapan</option>
+                  <option>
+                    Semua Kategori
+                  </option>
+
+                  <option value="Aluminium">
+                    Aluminium
+                  </option>
+
+                  <option value="Perlengkapan">
+                    Perlengkapan
+                  </option>
                 </select>
               </div>
 
@@ -348,6 +475,7 @@ export default function MaterialPage() {
                   <path d="m8 10 4 4 4-4" />
                   <path d="M5 19h14" />
                 </Icon>
+
                 Export Excel
               </button>
             </div>
@@ -356,7 +484,7 @@ export default function MaterialPage() {
               <table className="material-table">
                 <thead>
                   <tr>
-                    <th>ID :</th>
+                    <th>ID</th>
                     <th>Material</th>
                     <th>Satuan</th>
                     <th>Stok Saat Ini</th>
@@ -367,59 +495,173 @@ export default function MaterialPage() {
                 </thead>
 
                 <tbody>
-                  {filteredMaterials.map((material) => (
-                    <tr key={material.id}>
-                      <td>{material.id}</td>
-                      <td>{material.name}</td>
-                      <td>{material.unit}</td>
-                      <td>{material.stock}</td>
-                      <td>{material.minimum}</td>
+                  {filteredMaterials.length >
+                  0 ? (
+                    filteredMaterials.map(
+                      (material) => (
+                        <tr key={material.id}>
+                          <td>{material.id}</td>
 
-                      <td>
-                        <div
-                          className={`status-badge ${material.status.toLowerCase()}`}
-                        >
-                          <StatusIcon status={material.status} />
-                          {material.status}
-                        </div>
+                          <td>
+                            {material.name}
+                          </td>
+
+                          <td>
+                            {material.unit}
+                          </td>
+
+                          <td>
+                            {material.stock}
+                          </td>
+
+                          <td>
+                            {material.minimum}
+                          </td>
+
+                          <td>
+                            <div
+                              className={`status-badge ${material.status.toLowerCase()}`}
+                            >
+                              <StatusIcon
+                                status={
+                                  material.status
+                                }
+                              />
+
+                              {material.status}
+                            </div>
+                          </td>
+
+                          <td>
+                            <div className="material-actions">
+                              <Link
+                                href={`/material-masuk?id=${material.id}`}
+                                className="in-button"
+                              >
+                                <TransactionIcon
+                                  type="in"
+                                />
+
+                                Masuk
+                              </Link>
+
+                              <Link
+                                href={`/material-keluar?id=${material.id}`}
+                                className="out-button"
+                              >
+                                <TransactionIcon
+                                  type="out"
+                                />
+
+                                Keluar
+                              </Link>
+
+                              <button
+                              type="button"
+                              className="delete-button"
+                              onClick={() => setDeleteTarget(material)}
+                            >
+                              <Icon size={17}>
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 15H6L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                              </Icon>
+
+                              Hapus
+                            </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    )
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="empty-material-row"
+                      >
+                        Tidak ada material yang
+                        ditemukan.
                       </td>
-                      <td>
-                        <div className="material-actions">
-                            <Link
-                            href={`/material-masuk?id=${material.id}`}
-                            className="in-button"
-                            >
-                            <TransactionIcon type="in" />
-                            Masuk
-                            </Link>
-
-                            <Link
-                            href={`/material-keluar?id=${material.id}`}
-                            className="out-button"
-                            >
-                            <TransactionIcon type="out" />
-                            Keluar
-                            </Link>
-                        </div>
-                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
 
-            {/* PAGINATION */}
             <div className="table-footer">
               <span>
-                Menampilkan 1 sampai {filteredMaterials.length} dari{" "}
-                {filteredMaterials.length} entri
+                Menampilkan{" "}
+                {filteredMaterials.length} dari{" "}
+                {materials.length} material
               </span>
 
               <div className="pagination">
-                <button disabled>Previous</button>
-                <button className="current">1</button>
+                <button disabled>
+                  Previous
+                </button>
+
+                <button className="current">
+                  1
+                </button>
+
                 <button>2</button>
-                <button>Next&nbsp; →</button>
+
+                <button>
+                  Next&nbsp; →
+                </button>
+                {deleteTarget && (
+                <div className="delete-modal-overlay">
+                  <div className="delete-modal">
+                    <div className="delete-modal-icon">
+                      <Icon size={28}>
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M19 6l-1 15H6L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                      </Icon>
+                    </div>
+
+                    <h2>Hapus Material?</h2>
+
+                    <p>
+                      Apakah Anda yakin ingin menghapus material{" "}
+                      <strong>&quot;{deleteTarget.name}&quot;</strong>?
+                    </p>
+
+                    <span className="delete-modal-warning">
+                      Data material yang dihapus tidak dapat
+                      ditampilkan kembali dari daftar ini.
+                    </span>
+
+                    <div className="delete-modal-actions">
+                      <button
+                        type="button"
+                        className="delete-cancel-button"
+                        onClick={() => setDeleteTarget(null)}
+                      >
+                        Batal
+                      </button>
+
+                      <button
+                      type="button"
+                      className="delete-confirm-button"
+                      onClick={handleDelete}
+                    >
+                      <Icon size={17}>
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M19 6l-1 15H6L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                      </Icon>
+
+                      Ya, Hapus
+                    </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               </div>
             </div>
           </div>
