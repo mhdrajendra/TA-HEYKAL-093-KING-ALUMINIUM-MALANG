@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Icon({
   children,
@@ -116,6 +116,20 @@ const menuItems = [
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  useEffect(() => {
+    const updateDate = () => {
+      setCurrentDate(new Date());
+    };
+
+    updateDate();
+
+    // Cek tanggal setiap 1 menit
+    const interval = setInterval(updateDate, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="dashboard-layout">
@@ -214,7 +228,15 @@ export default function DashboardPage() {
                 <rect x="3" y="4" width="18" height="17" rx="2" />
                 <path d="M16 2v4M8 2v4M3 9h18" />
               </Icon>
-              <span>Rabu, 29 April 2026</span>
+
+              <span>
+                {currentDate.toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </section>
 
