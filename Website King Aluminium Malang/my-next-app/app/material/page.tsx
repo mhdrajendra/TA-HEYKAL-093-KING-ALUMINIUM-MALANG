@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 import {
   getMaterials,
@@ -160,6 +161,110 @@ export default function MaterialPage() {
 
   const [deleteTarget, setDeleteTarget] =
   useState<Material | null>(null);
+
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const handleExportRekap = () => {
+  if (materials.length === 0) {
+    alert("Tidak ada data material untuk direkap.");
+    setShowExportModal(false);
+    return;
+  }
+
+  const today = new Date();
+
+  const tanggal = today.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  const totalMaterial = materials.length;
+
+  const totalStok = materials.reduce(
+    (total, material) => total + material.stock,
+    0
+  );
+
+  const stokAman = materials.filter(
+    (material) => material.status === "Aman"
+  ).length;
+
+  const stokRendah = materials.filter(
+    (material) => material.status === "Rendah"
+  ).length;
+
+  const stokKosong = materials.filter(
+    (material) => material.status === "Kosong"
+  ).length;
+
+  const dataRekap = [
+    ["REKAP DATA MATERIAL"],
+    ["KING ALUMINIUM MALANG"],
+    [],
+    ["Tanggal Rekap", tanggal],
+    [],
+    ["RINGKASAN STOK"],
+    ["Total Material", totalMaterial],
+    ["Total Stok", totalStok],
+    ["Stok Aman", stokAman],
+    ["Stok Menipis", stokRendah],
+    ["Stok Habis", stokKosong],
+    [],
+    [
+      "No",
+      "ID",
+      "Material",
+      "Kategori",
+      "Satuan",
+      "Stok Saat Ini",
+      "Stok Minimum",
+      "Status",
+    ],
+    ...materials.map((material, index) => [
+      index + 1,
+      material.id,
+      material.name,
+      material.type,
+      material.unit,
+      material.stock,
+      material.minimum,
+      material.status,
+    ]),
+  ];
+
+  const worksheet =
+    XLSX.utils.aoa_to_sheet(dataRekap);
+
+  worksheet["!cols"] = [
+    { wch: 6 },
+    { wch: 15 },
+    { wch: 30 },
+    { wch: 20 },
+    { wch: 15 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 15 },
+  ];
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Rekap Material"
+  );
+
+  XLSX.writeFile(
+    workbook,
+    `Rekap_Data_Material_${tanggal.replace(
+      /\//g,
+      "-"
+    )}.xlsx`
+  );
+
+  setShowExportModal(false);
+};
 
   return (
     <div className="page-layout">
@@ -468,15 +573,19 @@ export default function MaterialPage() {
                   </option>
                 </select>
               </div>
-
-              <button className="export-button">
+                  
+              <button
+                type="button"
+                className="export-button"
+                onClick={() => setShowExportModal(true)}
+              >
                 <Icon size={18}>
                   <path d="M12 3v11" />
                   <path d="m8 10 4 4 4-4" />
                   <path d="M5 19h14" />
                 </Icon>
 
-                Export Excel
+                Export Rekap
               </button>
             </div>
 
@@ -611,6 +720,59 @@ export default function MaterialPage() {
                 <button>
                   Next&nbsp; →
                 </button>
+
+                {showExportModal && (
+                  <div className="export-modal-overlay">
+                    <div className="export-modal">
+                      <div className="export-modal-icon">
+                        <Icon size={29}>
+                          <path d="M12 3v11" />
+                          <path d="m7 10 5 5 5-5" />
+                          <path d="M5 20h14" />
+                        </Icon>
+                      </div>
+
+                      <h2>Unduh Rekap?</h2>
+
+                      <p>
+                        Apakah Anda yakin ingin mengunduh
+                        rekap data material dalam format Excel?
+                      </p>
+
+                      <span className="export-modal-info">
+                        Rekap akan berisi data material dan
+                        ringkasan stok terbaru.
+                      </span>
+
+                      <div className="export-modal-actions">
+                        <button
+                          type="button"
+                          className="export-cancel-button"
+                          onClick={() =>
+                            setShowExportModal(false)
+                          }
+                        >
+                          Batal
+                        </button>
+
+                        <button
+                          type="button"
+                          className="export-confirm-button"
+                          onClick={handleExportRekap}
+                        >
+                          <Icon size={17}>
+                            <path d="M12 3v11" />
+                            <path d="m7 10 5 5 5-5" />
+                            <path d="M5 20h14" />
+                          </Icon>
+
+                          Ya, Unduh
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {deleteTarget && (
                 <div className="delete-modal-overlay">
                   <div className="delete-modal">

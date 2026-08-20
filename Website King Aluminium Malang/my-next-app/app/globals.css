@@ -4444,3 +4444,273 @@ body {
   border-color: #d4575b !important;
   color: #ffffff !important;
 }
+
+/* =====================================================
+   EXPORT REKAP BUTTON
+===================================================== */
+
+.export-button {
+  cursor: pointer !important;
+}
+
+.export-button:hover {
+  cursor: pointer !important;
+}
+
+
+/* =====================================================
+   EXPORT CONFIRM BUTTON
+===================================================== */
+
+.export-modal-actions .export-confirm-button {
+  width: 130px;
+  min-width: 130px;
+  height: 44px;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+
+  padding: 0 18px !important;
+
+  background: #087f98 !important;
+  border: 1px solid #087f98 !important;
+  border-radius: 8px !important;
+
+  color: #ffffff !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.export-modal-actions .export-confirm-button svg {
+  flex-shrink: 0 !important;
+
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Saat cursor diarahkan */
+.export-modal-actions .export-confirm-button:hover {
+  background: #087f98 !important;
+  border-color: #087f98 !important;
+  color: #ffffff !important;
+}
+
+/* Ikon tetap putih saat hover */
+.export-modal-actions .export-confirm-button:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Focus / active tetap biru */
+.export-modal-actions .export-confirm-button:focus,
+.export-modal-actions .export-confirm-button:active {
+  background: #087f98 !important;
+  border-color: #087f98 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* =====================================================
+   EXPORT REKAP MODAL
+===================================================== */
+
+.export-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(33, 36, 44, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.export-modal {
+  width: 100%;
+  max-width: 430px;
+
+  background: #ffffff;
+  border: 1px solid #e0e1e5;
+  border-radius: 14px;
+
+  padding: 30px;
+
+  text-align: center;
+
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.16);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.export-modal-icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background: #eef7f9;
+  color: #087f98;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.export-modal h2 {
+  margin: 0;
+
+  color: #3f424c;
+
+  font-size: 21px;
+  font-weight: 700;
+
+  line-height: 1.3;
+}
+
+.export-modal p {
+  margin: 13px 0 8px;
+
+  color: #656a76;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.6;
+}
+
+.export-modal-info {
+  display: block;
+
+  margin-bottom: 25px;
+
+  color: #979aa3;
+
+  font-size: 10px;
+  font-weight: 400;
+
+  line-height: 1.5;
+}
+
+.export-modal-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.export-cancel-button,
+.export-confirm-button {
+  height: 44px;
+
+  min-width: 120px;
+
+  border-radius: 8px;
+
+  padding: 0 18px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+/* BATAL */
+
+.export-cancel-button {
+  border: 1px solid #c8cad0;
+
+  background: #ffffff;
+
+  color: #666b77;
+}
+
+.export-cancel-button:hover {
+  background: #f5f6f8;
+}
+
+/* YA, UNDUH */
+
+.export-confirm-button {
+  width: 130px;
+  min-width: 130px;
+
+  border: 1px solid #087f98;
+
+  background: #087f98;
+
+  color: #ffffff !important;
+
+  opacity: 1 !important;
+}
+
+.export-confirm-button svg {
+  flex-shrink: 0;
+
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.export-confirm-button:hover {
+  background: #076f85;
+
+  border-color: #076f85;
+
+  color: #ffffff !important;
+}
+
+.export-confirm-button:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+@media (max-width: 500px) {
+  .export-modal {
+    padding: 24px 20px;
+  }
+
+  .export-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .export-cancel-button,
+  .export-confirm-button {
+    width: 100%;
+  }
+}

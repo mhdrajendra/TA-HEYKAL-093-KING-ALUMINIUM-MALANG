@@ -9,6 +9,10 @@ import {
   saveMaterials,
   type Material,
 } from "@/lib/materials";
+import {
+  addTransaction,
+  generateTransactionId,
+} from "@/lib/transactions";
 
 function Icon({
   children,
@@ -150,6 +154,23 @@ export default function MaterialMasukPage() {
 
     saveMaterials(updatedMaterials);
     setMaterials(updatedMaterials);
+
+    addTransaction({
+      id: generateTransactionId(),
+      date: transactionDate,
+      time: new Date().toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: "Material Masuk",
+      materialId: selectedMaterial.id,
+      materialName: selectedMaterial.name,
+      quantity: quantityNumber,
+      unit: selectedMaterial.unit,
+      description:
+        description || "Pencatatan material masuk.",
+      user: "Admin",
+    });
 
     setMessage(
       `Transaksi berhasil disimpan. ${selectedMaterial.name} bertambah ${quantityNumber} ${selectedMaterial.unit}.`
