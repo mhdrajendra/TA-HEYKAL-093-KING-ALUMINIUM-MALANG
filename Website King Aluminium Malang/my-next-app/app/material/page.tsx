@@ -11,6 +11,14 @@ import {
   type MaterialStatus,
 } from "@/lib/materials";
 
+import {
+  getTransactions,
+} from "@/lib/transactions";
+
+import {
+  getProcurements,
+} from "@/lib/procurements";
+
 function Icon({
   children,
   size = 22,
@@ -132,11 +140,15 @@ export default function MaterialPage() {
 
   const totalMaterial = materials.length;
 
-  const lowStock = materials.filter(
+  const stokAman = materials.filter(
+    (material) => material.status === "Aman"
+  ).length;
+
+  const stokRendah = materials.filter(
     (material) => material.status === "Rendah"
   ).length;
 
-  const emptyStock = materials.filter(
+  const stokKosong = materials.filter(
     (material) => material.status === "Kosong"
   ).length;
 
@@ -173,49 +185,171 @@ export default function MaterialPage() {
 
   const today = new Date();
 
-  const tanggal = today.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  // Periode 7 hari terakhir, termasuk hari ini
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 6);
 
-  const totalMaterial = materials.length;
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
-  const totalStok = materials.reduce(
-    (total, material) => total + material.stock,
+  const formatFileDate = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
+  const startDateString = startDate.toISOString().split("T")[0];
+  const endDateString = today.toISOString().split("T")[0];
+
+  /*
+   * =====================================================
+   * DATA TRANSAKSI
+   * =====================================================
+   */
+
+  const transactions = getTransactions();
+
+  const weeklyTransactions = transactions.filter(
+    (transaction) =>
+      transaction.date >= startDateString &&
+      transaction.date <= endDateString
+  );
+
+  const materialMasuk = weeklyTransactions.filter(
+    (transaction) =>
+      transaction.type === "Material Masuk"
+  );
+
+  const materialKeluar = weeklyTransactions.filter(
+    (transaction) =>
+      transaction.type === "Material Keluar"
+  );
+
+    const totalMasuk = materialMasuk.reduce(
+    (total, transaction) =>
+      total + transaction.quantity,
     0
   );
 
-  const stokAman = materials.filter(
-    (material) => material.status === "Aman"
-  ).length;
+  const totalKeluar = materialKeluar.reduce(
+    (total, transaction) =>
+      total + transaction.quantity,
+    0
+  );
 
-  const stokRendah = materials.filter(
-    (material) => material.status === "Rendah"
-  ).length;
+  /*
+   * =====================================================
+   * DATA PENGADAAN
+   * =====================================================
+   */
 
-  const stokKosong = materials.filter(
-    (material) => material.status === "Kosong"
-  ).length;
+  const procurements = getProcurements();
 
-  const dataRekap = [
-    ["REKAP DATA MATERIAL"],
-    ["KING ALUMINIUM MALANG"],
-    [],
-    ["Tanggal Rekap", tanggal],
-    [],
-    ["RINGKASAN STOK"],
-    ["Total Material", totalMaterial],
-    ["Total Stok", totalStok],
-    ["Stok Aman", stokAman],
-    ["Stok Menipis", stokRendah],
-    ["Stok Habis", stokKosong],
-    [],
+  const weeklyProcurements = procurements.filter(
+    (procurement) =>
+      procurement.date >= startDateString &&
+      procurement.date <= endDateString
+  );
+
+  const pengadaanDiajukan = weeklyTransactions.filter(
+  (transaction) =>
+    transaction.type === "Pengadaan Diajukan"
+);
+
+const pengadaanDisetujui = weeklyTransactions.filter(
+  (transaction) =>
+    transaction.type === "Pengadaan Disetujui"
+);
+
+const pengadaanDitolak = weeklyTransactions.filter(
+  (transaction) =>
+    transaction.type === "Pengadaan Ditolak"
+);
+
+  /*
+   * =====================================================
+   * RINGKASAN STOK
+   * =====================================================
+   */
+
+  const totalMaterial = materials.length;
+
+  const totalStock = materials.reduce(
+    (total, material) =>
+      total + material.stock,
+    0
+  );
+
+  const totalPengadaanDiajukan =
+  pengadaanDiajukan.length;
+
+  const totalPengadaanDisetujui =
+    pengadaanDisetujui.length;
+
+  const totalPengadaanDitolak =
+    pengadaanDitolak.length;
+
+  /*
+   * =====================================================
+   * SHEET 1 — RINGKASAN
+   * =====================================================
+   */
+
+  const ringkasan = [
+  ["REKAP MINGGUAN"],
+  ["KING ALUMINIUM MALANG"],
+  [],
+  [
+    "Periode Rekap",
+    `${formatDate(startDate)} - ${formatDate(today)}`,
+  ],
+  [],
+  ["RINGKASAN STOK"],
+  ["Total Jenis Material", totalMaterial],
+  ["Total Stok", totalStock],
+  ["Stok Aman", stokAman],
+  ["Stok Menipis", stokRendah],
+  ["Stok Habis", stokKosong],
+  [],
+  ["AKTIVITAS MINGGUAN"],
+  ["Material Masuk", materialMasuk.length],
+  ["Total Material Masuk", totalMasuk],
+  ["Material Keluar", materialKeluar.length],
+  ["Total Material Keluar", totalKeluar],
+  [],
+  ["PENGADAAN MINGGUAN"],
+  [
+    "Pengadaan Diajukan",
+    totalPengadaanDiajukan,
+  ],
+  [
+    "Pengadaan Disetujui",
+    totalPengadaanDisetujui,
+  ],
+  [
+    "Pengadaan Ditolak",
+    totalPengadaanDitolak,
+  ],
+];
+
+  /*
+   * =====================================================
+   * SHEET 2 — REKAP STOK
+   * =====================================================
+   */
+
+  const stokData = [
     [
       "No",
       "ID",
       "Material",
-      "Kategori",
       "Satuan",
       "Stok Saat Ini",
       "Stok Minimum",
@@ -225,7 +359,6 @@ export default function MaterialPage() {
       index + 1,
       material.id,
       material.name,
-      material.type,
       material.unit,
       material.stock,
       material.minimum,
@@ -233,33 +366,180 @@ export default function MaterialPage() {
     ]),
   ];
 
-  const worksheet =
-    XLSX.utils.aoa_to_sheet(dataRekap);
+  /*
+   * =====================================================
+   * SHEET 3 — AKTIVITAS TRANSAKSI
+   * =====================================================
+   */
 
-  worksheet["!cols"] = [
+  const aktivitasData = [
+    [
+      "No",
+      "Tanggal",
+      "Waktu",
+      "Jenis Aktivitas",
+      "Material",
+      "Jumlah",
+      "Satuan",
+      "User",
+      "Keterangan",
+    ],
+    ...weeklyTransactions.map(
+      (transaction, index) => [
+        index + 1,
+        transaction.date,
+        transaction.time,
+        transaction.type,
+        transaction.materialName,
+        transaction.quantity,
+        transaction.unit,
+        transaction.user,
+        transaction.description,
+      ]
+    ),
+  ];
+
+  /*
+   * =====================================================
+   * SHEET 4 — REKAP PENGADAAN
+   * =====================================================
+   */
+
+  const pengadaanData = [
+    [
+      "No",
+      "ID Pengadaan",
+      "Tanggal",
+      "Material",
+      "Jumlah",
+      "Satuan",
+      "Supplier",
+      "Pemohon",
+      "Status",
+      "Keterangan",
+    ],
+    ...weeklyProcurements.map(
+      (procurement, index) => [
+        index + 1,
+        procurement.id,
+        procurement.date,
+        procurement.materialName,
+        procurement.quantity,
+        procurement.unit,
+        procurement.supplier,
+        procurement.requester,
+        procurement.status,
+        procurement.note,
+      ]
+    ),
+  ];
+
+  /*
+   * =====================================================
+   * BUAT WORKBOOK
+   * =====================================================
+   */
+
+  const workbook = XLSX.utils.book_new();
+
+  const ringkasanSheet =
+    XLSX.utils.aoa_to_sheet(ringkasan);
+
+  const stokSheet =
+    XLSX.utils.aoa_to_sheet(stokData);
+
+  const aktivitasSheet =
+    XLSX.utils.aoa_to_sheet(aktivitasData);
+
+  const pengadaanSheet =
+    XLSX.utils.aoa_to_sheet(pengadaanData);
+
+  /*
+   * =====================================================
+   * LEBAR KOLOM
+   * =====================================================
+   */
+
+  ringkasanSheet["!cols"] = [
+    { wch: 30 },
+    { wch: 35 },
+  ];
+
+  stokSheet["!cols"] = [
     { wch: 6 },
     { wch: 15 },
     { wch: 30 },
-    { wch: 20 },
     { wch: 15 },
     { wch: 18 },
     { wch: 18 },
     { wch: 15 },
   ];
 
-  const workbook = XLSX.utils.book_new();
+  aktivitasSheet["!cols"] = [
+    { wch: 6 },
+    { wch: 15 },
+    { wch: 10 },
+    { wch: 22 },
+    { wch: 30 },
+    { wch: 12 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 35 },
+  ];
+
+  pengadaanSheet["!cols"] = [
+    { wch: 6 },
+    { wch: 18 },
+    { wch: 15 },
+    { wch: 30 },
+    { wch: 12 },
+    { wch: 15 },
+    { wch: 25 },
+    { wch: 20 },
+    { wch: 18 },
+    { wch: 35 },
+  ];
+
+  /*
+   * =====================================================
+   * TAMBAHKAN SHEET
+   * =====================================================
+   */
 
   XLSX.utils.book_append_sheet(
     workbook,
-    worksheet,
-    "Rekap Material"
+    ringkasanSheet,
+    "Ringkasan"
   );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    stokSheet,
+    "Rekap Stok"
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    aktivitasSheet,
+    "Aktivitas"
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    pengadaanSheet,
+    "Pengadaan"
+  );
+
+  /*
+   * =====================================================
+   * DOWNLOAD
+   * =====================================================
+   */
 
   XLSX.writeFile(
     workbook,
-    `Rekap_Data_Material_${tanggal.replace(
-      /\//g,
-      "-"
+    `Rekap_Mingguan_King_Aluminium_${formatFileDate(
+      today
     )}.xlsx`
   );
 
@@ -493,7 +773,7 @@ export default function MaterialPage() {
             <div className="material-stat orange">
               <div>
                 <span>Stok Rendah</span>
-                <strong>{lowStock}</strong>
+                <strong>{stokRendah}</strong>
               </div>
 
               <div className="material-stat-icon">
@@ -504,7 +784,7 @@ export default function MaterialPage() {
             <div className="material-stat red">
               <div>
                 <span>Tidak ada Stok</span>
-                <strong>{emptyStock}</strong>
+                <strong>{stokKosong}</strong>
               </div>
 
               <div className="material-stat-icon">

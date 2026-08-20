@@ -168,7 +168,7 @@ export default function MaterialMasukPage() {
       quantity: quantityNumber,
       unit: selectedMaterial.unit,
       description:
-        description || "Pencatatan material masuk.",
+        description || "Material masuk.",
       user: "Admin",
     });
 

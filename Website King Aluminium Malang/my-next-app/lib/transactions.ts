@@ -19,42 +19,7 @@ export type Transaction = {
 };
 
 export const defaultTransactions: Transaction[] = [
-  {
-    id: "TRX-001",
-    date: "2026-04-29",
-    time: "10:30",
-    type: "Material Masuk",
-    materialId: "01",
-    materialName: "Aluminium Hollow",
-    quantity: 50,
-    unit: "Batang",
-    description: "Material diterima dari supplier.",
-    user: "Admin",
-  },
-  {
-    id: "TRX-002",
-    date: "2026-04-29",
-    time: "09:15",
-    type: "Material Keluar",
-    materialId: "02",
-    materialName: "Aluminium Plate",
-    quantity: 30,
-    unit: "Lembar",
-    description: "Material digunakan untuk produksi.",
-    user: "Admin",
-  },
-  {
-    id: "TRX-003",
-    date: "2026-04-28",
-    time: "16:40",
-    type: "Pengadaan Diajukan",
-    materialId: "03",
-    materialName: "Aluminium Pipa",
-    quantity: 100,
-    unit: "Batang",
-    description: "Pengadaan diajukan karena stok menipis.",
-    user: "Admin",
-  },
+  // data default kamu
 ];
 
 export function getTransactions(): Transaction[] {
@@ -110,7 +75,20 @@ export function addTransaction(
 export function generateTransactionId(): string {
   const transactions = getTransactions();
 
-  return `TRX-${String(
-    transactions.length + 1
-  ).padStart(3, "0")}`;
+  const numbers = transactions
+    .map((transaction) => {
+      const match = transaction.id.match(
+        /^TRX-(\d+)$/
+      );
+
+      return match ? Number(match[1]) : 0;
+    })
+    .filter((number) => !Number.isNaN(number));
+
+  const nextNumber =
+    numbers.length > 0
+      ? Math.max(...numbers) + 1
+      : 1;
+
+  return `TRX-${String(nextNumber).padStart(3, "0")}`;
 }
